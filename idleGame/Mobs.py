@@ -197,12 +197,40 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
     else:
         pygame.draw.lines(surface, body_col, False, [(sx + 22, sy + 50), (sx + 8, sy + 58), (sx + 2, sy + 48)], 6)
         pygame.draw.polygon(surface, body_col, [(sx - 2, sy + 42), (sx + 8, sy + 46), (sx + 2, sy + 56)])
-        pygame.draw.polygon(surface,detail_col, [(sx + 30, sy + 30), (sx + 0, sy + 4), (sx + 8, sy + 20), (sx - 6, sy + 22),
-                                                 (sx + 6, sy + 34), (sx +24, sy + 40)])
-        pygame.draw.polygon(surface, detail_col, [(sx + 50, sy + 30), (sx + 80, sy + 4), (sx + 72, sy + 20), (sx + 86, sy + 22),
-                                                  (sx + 74, sy + 34), (sx + 56, sy + 40)])
+        pygame.draw.polygon(surface,detail_col, [(sx + 30, sy + 30), (sx + 0, sy + 4), (sx + 8, sy + 20), (sx - 6, sy + 22), (sx + 6, sy + 34), (sx +24, sy + 40)])
+        pygame.draw.polygon(surface, detail_col, [(sx + 50, sy + 30), (sx + 80, sy + 4), (sx + 72, sy + 20), (sx + 86, sy + 22),(sx + 74, sy + 34), (sx + 56, sy + 40)])
         
         pygame.draw.rect(surface, body_col, (sx + 24, sy+ 58, 12, 16), border_radius = 3)
         pygame.draw.rect(surface, body_col, (sx + 48, sy + 58, 12, 16), border_radius = 3)
         for clx in (sx + 24, sx + 30, sx + 48, sx + 54):
-            
+            pygame.draw.polygon(surface, WHITE, [(clx, sy + 74), (clx + 4, sy + 74), (clx + 2, sy + 80)])
+        pygame.draw.ellipse(surface, body_col, (sx + 14, sy + 34, 56, 32))
+        for i in range(3):
+            pygame.draw.circle(surface, detail_col, (sx + 28 + i * 14, sy + 46), 4)
+
+        pygame.draw.polygon(surface, body_col, [(sx + 44, sy + 38), (sx + 62, sy + 30), (sx + 76, sy + 12), (sx + 58, sy + 10), (sx +46, sy +24)])
+        for spx, spy in [(sx + 50, sy + 30), (sx + 58, sy + 22), (sx + 66, sy + 16)]:
+            pygame.draw.polygon(surface, detail_col, [(spx - 3, spy), (spx, spy - 8), (spx + 3, spy)])
+        
+        pygame.draw.ellipse(surface, body_col, (sx + 62, sy + 0, 32, 22))
+        pygame.draw.polygon(surface, body_col, [(sx + 88, sy + 8), (sx + 99, sy + 12), (sx + 90, sy + 18)])
+        pygame.draw.polygon(surface, (200, 160, 20), [(sx + 68, sy + 2), (sx + 62, sy - 10), (sx + 74, sy + 0)])
+        pygame.draw.circle(surface, (255, 220, 0), (sx + 80, sy + 8), 4)
+        pygame.draw.circle(surface, (20, 20, 20), (sx + 81, sy + 9), 2)
+        pygame.draw.polygon(surface, (255, 140, 0), [(sx + 99, sy + 12), (sx + 108, sy + 8), (sx + 105, sy + 14), (sx + 109, sy + 16), (sx + 99, sy + 16)])
+
+    def mob_for_wave(w):
+        idx = min((w - 1) // 3, len(MOB_NAMES) - 1)
+        hp = int(10*(1.45 ** (w - 1)))
+        base_gold = int(w * 1.8 + 1)
+        return MOB_NAMES[idx], hp, base_gold
+    
+    def spawn_mob(state):
+        _, hp, _ = mob_for_wave(state["wave"])
+        state["mob_hp"] = hp
+        state["mob_max_hp"] = hp
+
+    def hit_mob(state, logs):
+        if state["mob_hp"] <= 0:
+            return False
+    
