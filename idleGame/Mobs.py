@@ -76,8 +76,8 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
         pygame.draw.ellipse(surface, (255,60,40), (sx + 45, sy + 18, 8, 5))
 
         pygame.draw.polygon(surface, (30,20,10), [(sx + 32, sy + 30), (sx + 50, sy + 30), (sx + 46, sy + 35), (sx + 36, sy + 35)])
-        for tx in(sx + 35, sx+ 40, sx + 45):
-            pygame.draw.polygon(surface, WHITE, [(tx, sy + 30), (tx + 3, sy + 30), (tx + 3, sy + 30), (tx + 1, sy + 33)])
+        for tx in(sx + 35, sx + 40, sx + 45):
+            pygame.draw.polygon(surface, WHITE, [(tx, sy + 30), (tx + 3, sy + 30), (tx + 1, sy + 33)], 2)
             
     elif mob_idx == 2:
             pygame.draw.rect(surface, detail_col, (sx +22, sy + 66, 14, 14), border_radius = 3)
@@ -88,7 +88,7 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
             pygame.draw.ellipse(surface, detail_col, (sx + 4, sy + 28, 22, 20))
             pygame.draw.ellipse(surface, detail_col, (sx + 64, sy + 28, 22, 20))
             pygame.draw.ellipse(surface, body_col, (sx + 22, sy + 8, 46, 30))
-            pygame.draw.rect(surface, _darken(body_col, 30), (sx + 30, sy + 1, 8, 30, 5), border_radius = 2)
+            pygame.draw.rect(surface, _darken(body_col, 30), (sx + 30, sy + 18, 30, 5), border_radius = 2)
 
             pygame.draw.circle(surface, (255, 120, 0), (sx + 34, sy + 24), 4)
             pygame.draw.circle(surface,  (255, 120, 0), (sx + 56, sy + 24), 4)
@@ -96,11 +96,10 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
             pygame.draw.polygon(surface, WHITE, [(sx + 32, sy + 34), (sx + 36, sy + 34), (sx + 30, sy + 46)])
             pygame.draw.polygon(surface, WHITE, [(sx + 58, sy + 34), (sx + 54, sy + 34), (sx + 60, sy + 46)])
 
-            for hx in (sx + 34, sx + 42, sx + 50, sx + 58):
-                 pygame.draw.polygon(surface, detail_col, [(hx, sy + 10), (hx + 5, sy - 6), (hx + 10, sy + 10)])
-                 pygame.draw.line(surface, (180, 30, 30), (sx + 30, sy + 28), (sx + 40, sy + 34), 3)
-                 pygame.draw.rect(surface, (90, 60,30), (sx + 76, sy + 10, 5, 50), border_radius = 2)
-                 pygame.draw.polygon(surface, (150, 150, 160), [(sx + 74, sy + 8), (sx + 92, sy + 4), (sx + 92, sy + 22), (sx + 74, sy + 20)])
+            
+            pygame.draw.line(surface, (180, 30, 30), (sx + 30, sy + 28), (sx + 40, sy + 34), 3)
+            pygame.draw.rect(surface, (90, 60,30), (sx + 76, sy + 10, 5, 50), border_radius = 2)
+            pygame.draw.polygon(surface, (150, 150, 160), [(sx + 74, sy + 8), (sx + 92, sy + 4), (sx + 92, sy + 22), (sx + 74, sy + 20)])
 
     elif mob_idx == 3:
          pygame.draw.ellipse(surface, detail_col, (sx + 14, sy + 72, 24, 12))
@@ -150,7 +149,7 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
         for ox, oy, r in [(-6, 30, 30), (-14, 40, 7), (4, 52, 6)]:
             pygame.draw.circle(surface, body_col, (sx + 40 + ox, sy + oy),r)
 
-        pygame.draw.ellipsse(surface,  body_col, (sx + 18, sy + 38, 56, 30))
+        pygame.draw.ellipse(surface,  body_col, (sx + 18, sy + 38, 56, 30))
 
         for lx in (sx + 24, sx + 38, sx + 54, sx + 66):
             pygame.draw.polygon(surface, body_col, [(lx, sy + 58), (lx + 6, sy + 58), (lx + 3, sy +74)])
@@ -219,18 +218,45 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
         pygame.draw.circle(surface, (20, 20, 20), (sx + 81, sy + 9), 2)
         pygame.draw.polygon(surface, (255, 140, 0), [(sx + 99, sy + 12), (sx + 108, sy + 8), (sx + 105, sy + 14), (sx + 109, sy + 16), (sx + 99, sy + 16)])
 
-    def mob_for_wave(w):
+def mob_for_wave(w):
         idx = min((w - 1) // 3, len(MOB_NAMES) - 1)
         hp = int(10*(1.45 ** (w - 1)))
         base_gold = int(w * 1.8 + 1)
         return MOB_NAMES[idx], hp, base_gold
     
-    def spawn_mob(state):
+def spawn_mob(state):
         _, hp, _ = mob_for_wave(state["wave"])
         state["mob_hp"] = hp
         state["mob_max_hp"] = hp
 
-    def hit_mob(state, logs):
+def hit_mob(state, logs):
         if state["mob_hp"] <= 0:
             return False
+        dmg = state["damage"]
+        is_crit = False
+        if state["crit_chance"] > 0 and random.random() * 100 < state ["crit_chance"]:
+            dmg = int(dmg * state["crit_mult"])
+            is_crit = True
+        state["mob_hp"] = max(0, state["mob_hp"] - dmg)
+        if is_crit:
+            logs.append(("CRIT! {} damage!".format(dmg), ORANGE))
+        if state["mob_hp"] <= 0:
+            kill_mob(state, logs)
+            return True
+        return False
+    
+def kill_mob(state, logs):
+        _, _, base_gold = mob_for_wave(state["wave"])
+        earned = int(base_gold * state["gold_mult"])
+        mob_name, _, _ = mob_for_wave(state["wave"])
+        state["gold"] += earned
+        state["kills"] += 1
+        state["kills_in_wave"] += 1
+        logs.append(("Killed {}!".format(mob_name), GREEN))
+        if state["kills_in_wave"] >= 10:
+            state["kills_in_wave"] = 0
+            state["wave"] += 1
+            next_name, _, _ = mob_for_wave(state["wave"])
+            logs.append(("Wave {}! {} appears!".format(state["wave"], next_name), BLUE))
+        spawn_mob(state)
     

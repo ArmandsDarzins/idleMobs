@@ -6,11 +6,11 @@ BLUE = (50, 130, 220)
 UPGRADES = {
     "attack":[
         {"id":"atk1","name":"Sharpened Blade","desc":"+2 dmg / level","max":5,
-         "base_cost":15,"mult":2.2,"requiere":None,"req_lvl":0,"effect":"damage","value":2},
-        {"id":"atk2","name":"Heavy Strikes", "dessc":"+5 dmg / level","max":4,"base_cost":120,
+         "base_cost":15,"mult":2.2,"requieres":None,"req_lvl":0,"effect":"damage","value":2},
+        {"id":"atk2","name":"Heavy Strikes", "desc":"+5 dmg / level","max":4,"base_cost":120,
              "mult":2.8,"requieres":"atk1","req_lvl":3,"effect":"damage","value":5},
         {"id":"atk3","name":"Berserker Rage", "desc":"+15 dmg / level","max":3,"base_cost":1200,
-         "mult":3.5,"requiere":"atk2","req_lvl":2,"effect":"damage","value":15},
+         "mult":3.5,"requieres":"atk2","req_lvl":2,"effect":"damage","value":15},
     ],
     "speed": [
         {"id":"spd1","name":"Quick Hands", "desc":"-20% attack interval / level", "max":5,
@@ -34,7 +34,7 @@ UPGRADES = {
         {"id":"crt2","name":"Vital Points","desc":"+3x crit mult / level","max":3,
          "base_cost":500,"mult":3.3,"requieres":"crt1","req_lvl":2,"effect":"crit_mult","value":3},
         {"id":"crt3","name":"Execution Strike","desc":"+10% crit chance / level","max":2,
-         "base_cost":4000,"mult":5.0,"requieres":"ctr2","req_lvl":2,"effect":"crit_chance","value":10},
+         "base_cost":4000,"mult":5.0,"requieres":"crt2","req_lvl":2,"effect":"crit_chance","value":10},
     ],
 }
 
@@ -42,7 +42,7 @@ ALL_UPGRADES = [u for upgs in UPGRADES.values() for u in upgs]
 
 
 def upg_cost(upg, lvl):
-    return int(upg["base_cost"] * upg(["mult"] ** lvl))
+    return int(upg["base_cost"] * (upg["mult"] ** lvl))
 
 def buy_upgrade(upg_id, state, logs):
     upg = next((u for u in ALL_UPGRADES if u["id"] == upg_id), None)
@@ -51,7 +51,7 @@ def buy_upgrade(upg_id, state, logs):
     lvl = state["levels"][upg_id]
     if lvl >= upg["max"]:
         return False
-    if upg["requiered"] and state ["levels"][upg["requieres"]] < upg["req_lvl"]:
+    if upg["requieres"] and state ["levels"][upg["requieres"]] < upg["req_lvl"]:
         return False
     cost = upg_cost(upg, lvl)
     if state["gold"] < cost:
