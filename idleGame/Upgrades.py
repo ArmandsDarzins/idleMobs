@@ -1,38 +1,7 @@
-import pygame
-import json
-import os
-import math
-
-pygame.init()
-
-WIDTH, HEIGHT = 900, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Mobs idle")
-clock = pygame.time.Clock()
 
 
-BG = (18, 18, 24)
-SURFACE = (28, 28, 38)
-SURFACE2 = (38, 38, 52)
-WHITE = (220, 220, 230)
-MUTED = (120, 120, 140)
-GOLD = (186, 117, 23)
-RED = (200, 60, 60)
-GREEN = (60, 180, 100)
 BLUE = (50, 130, 220)
-ORANGE = (210, 100, 40)
-LOCKED = (60, 60, 75)
-TAB_ACTIVE = (50, 130, 220)
 
-font_big = pygame.font.Sysfont("segoeui", 28, bold=True)
-font_med = pygame.font.Sysfont("segoeui", 18)
-font_small = pygame.font.Sysfont("segoeui", 14)
-font_tiny = pygame.font.Sysfont("segoeui", 12)
-
-SAVE_FILE = "save.json"
-
-MOB_NAMES = ["Slime", "Goblin", "Orc", "Troll", "Dark knight", "Shadow beast",
-             "Demon lord", "Ancient dragon"]
 
 UPGRADES = {
     "attack":[
@@ -67,4 +36,41 @@ UPGRADES = {
         {"id":"crt3","name":"Execution Strike","desc":"+10% crit chance / level","max":2,
          "base_cost":4000,"mult":5.0,"requieres":"ctr2","req_lvl":2,"effect":"crit_chance","value":10},
     ],
-} 
+}
+
+ALL_UPGRADES = [u for upgs in UPGRADES.values() for u in upgs]
+
+
+def upg_cost(upg, lvl):
+    return int(upg["base_cost"] * upg(["mult"] ** lvl))
+
+def buy_upgrade(upg_id, state, logs):
+    upg = next((u for u in ALL_UPGRADES if u["id"] == upg_id), None)
+    if not upg:
+        return False
+    lvl = state["levels"][upg_id]
+    if lvl >= upg["max"]:
+        return False
+    if upg["requiered"] and state ["levels"][upg["requieres"]] < upg["req_lvl"]:
+        return False
+    cost = upg_cost(upg, lvl)
+    if state["gold"] < cost:
+        return False
+    state["gold"] -= cost
+    state["levels"][upg_id] = lvl + 1
+    effect = upg["effect"]
+    val = upg["value"]
+
+    if effect == "damage":
+        state["damage"] += val
+    elif effect == "speed":
+        state["auto_interval"] = max(100, int(state["auto_interval"] * val))
+    elif effect == "gold":
+        state["gold_mult"] += val
+    elif effect == "crit_chance":
+        state["crit_chance"] += val
+    elif effect == "crit_mult":
+        state["crit_mult"] += val
+    
+    logs.append(("Upgraded {}! ".format(upg["name"]), BLUE))
+    return True
