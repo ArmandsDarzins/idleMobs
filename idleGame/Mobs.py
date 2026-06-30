@@ -219,8 +219,8 @@ def draw_mob_sprite(surface, mob_idx, cx, mob_y, mob_w, mob_h, hp_pct):
         pygame.draw.polygon(surface, (255, 140, 0), [(sx + 99, sy + 12), (sx + 108, sy + 8), (sx + 105, sy + 14), (sx + 109, sy + 16), (sx + 99, sy + 16)])
 
 def mob_for_wave(w):
-        idx = min((w - 1) // 3, len(MOB_NAMES) - 1)
-        hp = int(10*(1.45 ** (w - 1)))
+        idx = min((w - 1) // 5, len(MOB_NAMES) - 1)
+        hp = int(10*(1.33 ** (w - 1)))
         base_gold = int(w * 1.8 + 1)
         return MOB_NAMES[idx], hp, base_gold
     

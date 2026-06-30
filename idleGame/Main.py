@@ -217,7 +217,7 @@ def main():
         mob_y = PANEL_TOP + STAT_H + 10
         draw_rect_rounded(screen, SURFACE, (cx, mob_y, COMBAT_W, MOB_H), 12)
         mob_name, _, _ = mob_for_wave(state["wave"])
-        mob_idx = min((state["wave"] - 1) // 3, len(MOB_NAMES) - 1)
+        mob_idx = min((state["wave"] - 1) // 5, len(MOB_NAMES) - 1)
         draw_text(screen, mob_name, font_big, WHITE, cx + 16, mob_y + 12)
         kills_left = 10 - state["kills_in_wave"]
         draw_text(screen, "Wave {} - {} kills till next wave". format(state["wave"], kills_left),
@@ -254,7 +254,7 @@ def main():
         log_y = mob_y + MOB_H + 10
         draw_rect_rounded(screen, SURFACE, (cx, log_y, COMBAT_W, LOG_H), 12)
         draw_text(screen, "Log", font_tiny, MUTED, cx + 12, log_y + 8)
-        visible = logs[-(LOG_H // 18):]
+        visible = logs[-((LOG_H - 25) // 18):]
         for i, (msg, col) in enumerate(visible):
             draw_text(screen, msg, font_tiny, col, cx + 12, log_y + 26 + i * 18)
 
