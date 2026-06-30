@@ -1,4 +1,4 @@
-# idleGame-python
+# idleMobs
 an idle game on python that im developing a project to start with
 
 What you do in game is:
